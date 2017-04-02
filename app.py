@@ -10,7 +10,7 @@ from ConfigParser import SafeConfigParser
 
 global mysqlConfig
 mysqlConfig = SafeConfigParser()
-mysqlConfig.read('mysqlConfig.ini')
+mysqlConfig.read('/home/flask/mysqlConfig.ini')
 
 """
 A example for creating a Table that is sortable by its header
