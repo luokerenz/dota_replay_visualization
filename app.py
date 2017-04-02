@@ -8,6 +8,7 @@ import pandas as pd
 import time
 from ConfigParser import SafeConfigParser
 
+global mysqlConfig
 mysqlConfig = SafeConfigParser()
 mysqlConfig.read('mysqlConfig.ini')
 
@@ -17,7 +18,7 @@ A example for creating a Table that is sortable by its header
 
 app = Flask(__name__, static_url_path = "", static_folder="static")
 # init dictionary lookup
-conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
+conv_dict = pd.read_csv('/home/flask/bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
 global id_to_name
 id_to_name = conv_dict['name']
 
