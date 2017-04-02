@@ -76,4 +76,4 @@ def index():
 
 if __name__ == '__main__':
 	#print jdata
-  app.run(host='0.0.0.0', debug=True)
+  app.run(host='0.0.0.0', debug=mysqlConfig.get('all', 'config'))
