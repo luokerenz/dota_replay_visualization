@@ -1,6 +1,8 @@
 from flask import Flask, render_template, redirect
 from datetime import datetime, timedelta
-import MySQLdb
+#import MySQLdb
+import pymysql
+pymysql.install_as_MySQLdb()
 import json
 import pandas as pd
 import time
