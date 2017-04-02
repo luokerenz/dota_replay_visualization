@@ -6,7 +6,7 @@ RUN apk add --no-cache g++ && \
     pip install cython==0.25.2 numpy==1.12.0 && \
     pip install pandas==0.19.2
 
-RUN pip install flask pymsql
+RUN pip install flask pymysql
 RUN git clone https://github.com/luokerenz/dota_replay_visualization /home/flask
 
 EXPOSE 5000
