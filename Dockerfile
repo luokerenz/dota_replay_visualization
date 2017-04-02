@@ -6,10 +6,8 @@ RUN apk add --no-cache g++ && \
     pip install cython==0.25.2 numpy==1.12.0 && \
     pip install pandas==0.19.2
 
-RUN pip install flask pymysql
-
-RUN apk update && apk upgrade && \
-    apk add --no-cache bash git openssh
+RUN apk add py-mysqldb
+RUN pip install flask mysql-python
 
 COPY . /home/flask/
 
