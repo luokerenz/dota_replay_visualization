@@ -6,7 +6,7 @@ RUN apk add --no-cache g++ && \
     pip install cython==0.25.2 numpy==1.12.0 && \
     pip install pandas==0.19.2
 
-RUN apk add py-mysqldb
+RUN apk add mariadb-dev mariadb-client mariadb-libs
 RUN pip install flask mysql-python
 
 COPY . /home/flask/
