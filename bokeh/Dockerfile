@@ -12,4 +12,4 @@ COPY . /home/bokeh/
 
 EXPOSE 5006
 
-ENTRYPOINT ["bokeh","serve","/home/bokeh/main.py", "--port", "5006", "--host", "dota.luokerenz.com:80"]
+ENTRYPOINT ["bokeh","serve","/home/bokeh/replay.py", "--port", "5006", "--host", "dota.luokerenz.com:5006", "--allow-websocket-origin=dota.luokerenz.com"]
