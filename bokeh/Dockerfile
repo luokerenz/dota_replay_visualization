@@ -8,8 +8,8 @@ RUN apk add --no-cache g++ && \
 
 RUN pip install flask pymongo bokeh
 
-COPY . /home/
+COPY . /home/bokeh/
 
 EXPOSE 5006
 
-ENTRYPOINT ["bokeh","serve","/home/bokeh/main.py", "--port", "5006", "--host", "127.0.0.1:5006"]
+ENTRYPOINT ["bokeh","serve","/home/bokeh/main.py", "--port", "5006", "--host", "dota.luokerenz.com:80"]
