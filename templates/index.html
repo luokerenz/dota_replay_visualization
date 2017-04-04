@@ -20,18 +20,6 @@
                         color: #ffffff;
                 }
 
-                #info {
-                        position: absolute;
-                        width: 100%;
-                        color: #ffffff;
-                        padding: 5px;
-                        font-family: Monospace;
-                        font-size: 13px;
-                        font-weight: bold;
-                        text-align: center;
-                        z-index: 1;
-                }
-
                 #menu {
                         position: absolute;
                         bottom: 20px;
@@ -91,7 +79,7 @@
                                 color: rgba(127,255,255,0.75);
                         }
 
-                button {
+                #menu button {
                         color: rgba(127,255,255,0.75);
                         background: transparent;
                         outline: 1px solid rgba(127,255,255,0.75);
@@ -99,12 +87,189 @@
                         padding: 5px 10px;
                         cursor: pointer;
                 }
-                button:hover {
+                #menu button:hover {
                         background-color: rgba(0,255,255,0.5);
                 }
-                button:active {
+                #menu button:active {
                         color: #000000;
                         background-color: rgba(0,255,255,0.75);
+                }
+
+                .sbx-google {
+                  display: inline-block;
+                  position: absolute;
+                  left: 50%;
+                  right: auto;
+                  top: 30%;
+                  width: 500px;
+                  height: 41px;
+                  white-space: nowrap;
+                  box-sizing: border-box;
+                  font-size: 14px;
+                  transform: translate(-50%, -50%);
+                }
+
+                .sbx-google__wrapper {
+                  width: 100%;
+                  height: 100%;
+                }
+
+                .sbx-google__input {
+                  display: inline-block;
+                  -webkit-transition: box-shadow .4s ease, background .4s ease;
+                  transition: box-shadow .4s ease, background .4s ease;
+                  border: 0;
+                  border-radius: 4px;
+                  box-shadow: inset 0 0 0 1px #CCCCCC;
+                  background: #FFFFFF;
+                  padding: 0;
+                  padding-right: 77px;
+                  padding-left: 11px;
+                  width: 100%;
+                  height: 100%;
+                  vertical-align: middle;
+                  white-space: normal;
+                  font-size: inherit;
+                  -webkit-appearance: none;
+                     -moz-appearance: none;
+                          appearance: none;
+                }
+
+                .sbx-google__input::-webkit-search-decoration, .sbx-google__input::-webkit-search-cancel-button, .sbx-google__input::-webkit-search-results-button, .sbx-google__input::-webkit-search-results-decoration {
+                  display: none;
+                }
+
+                .sbx-google__input:hover {
+                  box-shadow: inset 0 0 0 1px #b3b3b3;
+                }
+
+                .sbx-google__input:focus, .sbx-google__input:active {
+                  outline: 0;
+                  box-shadow: inset 0 0 0 1px #3E82F7;
+                  background: #FFFFFF;
+                }
+
+                .sbx-google__input::-webkit-input-placeholder {
+                  color: #AAAAAA;
+                }
+
+                .sbx-google__input::-moz-placeholder {
+                  color: #AAAAAA;
+                }
+
+                .sbx-google__input:-ms-input-placeholder {
+                  color: #AAAAAA;
+                }
+
+                .sbx-google__input::placeholder {
+                  color: #AAAAAA;
+                }
+
+                .sbx-google__submit {
+                  position: absolute;
+                  top: 0;
+                  right: 0;
+                  left: inherit;
+                  margin: 0;
+                  border: 0;
+                  border-radius: 0 3px 3px 0;
+                  background-color: #3e82f7;
+                  padding: 0;
+                  width: 49px;
+                  height: 100%;
+                  vertical-align: middle;
+                  text-align: center;
+                  font-size: inherit;
+                  -webkit-user-select: none;
+                     -moz-user-select: none;
+                      -ms-user-select: none;
+                          user-select: none;
+                }
+
+                .sbx-google__submit::before {
+                  display: inline-block;
+                  margin-right: -4px;
+                  height: 100%;
+                  vertical-align: middle;
+                  content: '';
+                }
+
+                .sbx-google__submit:hover, .sbx-google__submit:active {
+                  cursor: pointer;
+                }
+
+                .sbx-google__submit:focus {
+                  outline: 0;
+                }
+
+                .sbx-google__submit svg {
+                  width: 21px;
+                  height: 21px;
+                  vertical-align: middle;
+                  fill: #FFFFFF;
+                }
+
+                .sbx-google__reset {
+                  display: none;
+                  position: absolute;
+                  top: 10px;
+                  right: 56px;
+                  margin: 0;
+                  border: 0;
+                  background: none;
+                  cursor: pointer;
+                  padding: 0;
+                  font-size: inherit;
+                  -webkit-user-select: none;
+                     -moz-user-select: none;
+                      -ms-user-select: none;
+                          user-select: none;
+                  fill: rgba(0, 0, 0, 0.5);
+                }
+
+                .sbx-google__reset:focus {
+                  outline: 0;
+                }
+
+                .sbx-google__reset svg {
+                  display: block;
+                  margin: 4px;
+                  width: 13px;
+                  height: 13px;
+                }
+
+                .sbx-google__input:valid ~ .sbx-google__reset {
+                  display: block;
+                  -webkit-animation-name: sbx-reset-in;
+                          animation-name: sbx-reset-in;
+                  -webkit-animation-duration: .15s;
+                          animation-duration: .15s;
+                }
+
+                @-webkit-keyframes sbx-reset-in {
+                  0% {
+                    -webkit-transform: translate3d(-20%, 0, 0);
+                            transform: translate3d(-20%, 0, 0);
+                    opacity: 0;
+                  }
+                  100% {
+                    -webkit-transform: none;
+                            transform: none;
+                    opacity: 1;
+                  }
+                }
+
+                @keyframes sbx-reset-in {
+                  0% {
+                    -webkit-transform: translate3d(-20%, 0, 0);
+                            transform: translate3d(-20%, 0, 0);
+                    opacity: 0;
+                  }
+                  100% {
+                    -webkit-transform: none;
+                            transform: none;
+                    opacity: 1;
+                  }
                 }
         </style>
 </head>
@@ -115,12 +280,39 @@
         <script src="/CSS3DRenderer.js"></script>
 
         <div id="container"></div>
-        <div id="info"><a href="http://threejs.org" target="_blank">three.js css3d</a> - periodic table. <a href="https://plus.google.com/113862800338869870683/posts/QcFk5HrWran" target="_blank">info</a>.</div>
+
+        <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol xmlns="http://www.w3.org/2000/svg" id="sbx-icon-search-13" viewBox="0 0 40 40">
+          <path d="M26.804 29.01c-2.832 2.34-6.465 3.746-10.426 3.746C7.333 32.756 0 25.424 0 16.378 0 7.333 7.333 0 16.378 0c9.046 0 16.378 7.333 16.378 16.378 0 3.96-1.406 7.594-3.746 10.426l10.534 10.534c.607.607.61 1.59-.004 2.202-.61.61-1.597.61-2.202.004L26.804 29.01zm-10.426.627c7.323 0 13.26-5.936 13.26-13.26 0-7.32-5.937-13.257-13.26-13.257C9.056 3.12 3.12 9.056 3.12 16.378c0 7.323 5.936 13.26 13.258 13.26z"
+          fill-rule="evenodd" />
+        </symbol>
+        <symbol xmlns="http://www.w3.org/2000/svg" id="sbx-icon-clear-3" viewBox="0 0 20 20">
+          <path d="M8.114 10L.944 2.83 0 1.885 1.886 0l.943.943L10 8.113l7.17-7.17.944-.943L20 1.886l-.943.943-7.17 7.17 7.17 7.17.943.944L18.114 20l-.943-.943-7.17-7.17-7.17 7.17-.944.943L0 18.114l.943-.943L8.113 10z" fill-rule="evenodd" />
+        </symbol>
+        </svg>
+
+        <form novalidate="novalidate"  action="/replay" method="get" class="searchbox sbx-google">
+          <div role="search" class="sbx-google__wrapper">
+            <input type="search" name="match_id" placeholder="Search match with match id" autocomplete="off" required="required" class="sbx-google__input">
+            <button type="submit" title="Search match!." class="sbx-google__submit">
+              <svg role="img" aria-label="Search">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#sbx-icon-search-13"></use>
+              </svg>
+            </button>
+            <button type="reset" title="Clear match id." class="sbx-google__reset">
+              <svg role="img" aria-label="Reset">
+                <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#sbx-icon-clear-3"></use>
+              </svg>
+            </button>
+          </div>
+        </form>
+        <script type="text/javascript">
+          document.querySelector('.searchbox [type="reset"]').addEventListener('click', function() {  this.parentNode.querySelector('input').focus();});
+        </script>
+
         <div id="menu">
-                <button id="table">TABLE</button>
-                <button id="sphere">SPHERE</button>
-                <button id="helix">HELIX</button>
-                <button id="grid">GRID</button>
+                <button id="sphere" class="lowerbutton">SPHERE</button>
+                <button id="helix" class="lowerbutton">HELIX</button>
         </div>
 
         <script>
@@ -163,7 +355,7 @@
 
                             var symbol = document.createElement( 'div' );
                             symbol.className = 'symbol';
-                            symbol.innerHTML = '<a href=\"http://dota.luokerenz.com/replay?match_id='+table[i]+'\">'+table[i]+'</a>';
+                            symbol.innerHTML = '<a href=\"http://192.168.1.149:5006/?match_id='+table[i]+'\">'+table[i]+'</a>';
                             element.appendChild( symbol );
 
                             var details = document.createElement( 'div' );
@@ -272,13 +464,6 @@
                     controls.maxDistance = 6000;
                     controls.addEventListener( 'change', render );
 
-                    var button = document.getElementById( 'table' );
-                    button.addEventListener( 'click', function ( event ) {
-
-                            transform( targets.table, 2000 );
-
-                    }, false );
-
                     var button = document.getElementById( 'sphere' );
                     button.addEventListener( 'click', function ( event ) {
 
@@ -290,13 +475,6 @@
                     button.addEventListener( 'click', function ( event ) {
 
                             transform( targets.helix, 2000 );
-
-                    }, false );
-
-                    var button = document.getElementById( 'grid' );
-                    button.addEventListener( 'click', function ( event ) {
-
-                            transform( targets.grid, 2000 );
 
                     }, false );
 
