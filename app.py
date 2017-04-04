@@ -7,7 +7,7 @@ import time
 from ConfigParser import SafeConfigParser
 
 mysqlConfig = SafeConfigParser()
-mysqlConfig.read('mysqlConfig.ini')
+mysqlConfig.read('/home/flask/mysqlConfig.ini')
 
 """
 A example for creating a Table that is sortable by its header
@@ -15,7 +15,7 @@ A example for creating a Table that is sortable by its header
 
 app = Flask(__name__, static_url_path = "", static_folder="static")
 # init dictionary lookup
-conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
+conv_dict = pd.read_csv('/home/flask/bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
 global id_to_name
 id_to_name = conv_dict['name']
 
@@ -78,10 +78,6 @@ def index():
     formated_data = indexQ()
     return render_template("index.html", table=formated_data)
 
-@app.route('/match')
-def temp_bokeh():
-    return redirect('http://192.168.1.149:5006')
-
 if __name__ == '__main__':
 	#print jdata
-  app.run(host='0.0.0.0', debug=True)
+  app.run(host='0.0.0.0')
