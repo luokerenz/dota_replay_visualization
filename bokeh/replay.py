@@ -177,7 +177,10 @@ for doc in cur:
 
 # init dataFrame
 cd_parent = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(start_time)})
-cavg_mmr = int(cd_parent['avg_mmr'])
+if cd_parent['avg_mmr']:
+    cavg_mmr = int(cd_parent['avg_mmr'])
+else:
+    cavg_mmr = 'unknown'
 cd = cd_parent["data"]
 name_list = [' ']*10
 gd = [int(0)]*10
