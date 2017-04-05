@@ -7,7 +7,7 @@ import json
 
 from bokeh.io import curdoc
 from bokeh.layouts import row, column, widgetbox
-from bokeh.models import LinearAxis, ColumnDataSource, HoverTool
+from bokeh.models import LinearAxis, ColumnDataSource, HoverTool, LabelSet
 from bokeh.models.widgets import Slider, Toggle, CheckboxButtonGroup, DataTable, TableColumn, Panel, Tabs, Div
 from bokeh.models.glyphs import ImageURL, Segment
 from bokeh.plotting import figure
@@ -18,12 +18,17 @@ global mongoConfig
 mongoConfig = SafeConfigParser()
 mongoConfig.read('/home/bokeh/mongoConfig.ini')
 
-styleCSS = """"""
+styleCSS = """<style>body>div>div>div>div>div:first-child>div:first-child>div>input {color: #fff;}</style>"""
 
 def timeConverter(seconds):
-    m, s = divmod(int(seconds), 60)
-    h, m = divmod(m, 60)
-    return "%d:%02d:%02d" % (h, m, s)
+    if seconds < 0:
+        m, s = divmod(seconds*-1, 60)
+        h, m = divmod(m, 60)
+        return "-%d:%02d:%02d" % (h, m, s)
+    else:
+        m, s = divmod(seconds, 60)
+        h, m = divmod(m, 60)
+        return "%d:%02d:%02d" % (h, m, s)
 
 def coor_finder(mongo_client, time):
     return 0
@@ -37,12 +42,13 @@ def icon_finder(hero_id, id_to_name): #input: hero_id, dictionary used for id to
 def update_plot(attrname, old, new):
     global ahl
     tick = int(time_slider.value)
-    time_slider.title = timeConverter(tick)
+    fTick_source.data['format_tick'] = [timeConverter(tick)]
     cd = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(tick)})["data"]
     cgd = [int(0)]*10
     cexp = [int(0)]*10
     cdmg_h = [int(0)]*10
     cdmg_l = [int(0)]*10
+    cdmg_j = [int(0)]*10
     ahl = [0]*10
     circleX = []
     circleY = []
@@ -59,8 +65,10 @@ def update_plot(attrname, old, new):
         cexp[i] = cd[i]["d"][3]
         cdmg_h[i] = cd[i]["d"][7]
         cdmg_l[i] = cd[i]["d"][8]
+        cdmg_j[i] = cd[i]["d"][9]
 
     max_y = max(cgd+cexp)+200
+    hero_img_source.data['y']=[max_y*0.1]*10
 
     source.data = columnDict
     circle_source.data['x'] = circleX
@@ -69,9 +77,9 @@ def update_plot(attrname, old, new):
     exp_source.data['height'] = cexp
     dmgH_source.data['height'] = cdmg_h
     dmgL_source.data['height'] = cdmg_l
+    dmgJ_source.data['height'] = cdmg_j
 
     updateBracket('data',{'value':0},{'value':0})
-    hero_img_source.data = dict(url=heroURL_list, x=[ind+0.5 for ind in range(1,20,2)], y=[max_y*0.1]*10, h=[1/(21/max_y)]*10)
 
 def toggle_cc(arg):
     global play_state
@@ -87,8 +95,10 @@ def analysis_update(new):
     switch = analysis_grp.active
     if 0 in switch: # switch for bracket data
         segdata_3.data['alphacc']=[1]*20
+        dmgdata_3.data['alphacc'] = [1]*30
     else:
         segdata_3.data['alphacc']=[0]*20
+        dmgdata_3.data['alphacc'] = [0]*30
     updateBracket('data',{'value':0},{'value':1})
 
 def updateBracket(attrname, old, new):
@@ -104,23 +114,27 @@ def updateBracket(attrname, old, new):
         # if new tick is out of range of previous tick, update
         if abs(pre_tick-floor_tick)>=60:
             current_y = segdata_3.data['y0']
-            dmg_currentY = segdata_3.data['y0_dmg']
+            dmg_currentY = dmgdata_3.data['y0']
             #print 'looking for time: %s' %floor_tick
             anad = db.aggreResult.find({"$and": [{"_id.time":floor_tick},{"$or": [{"_id.h":ahl[0]},{"_id.h":ahl[1]},{"_id.h":ahl[2]},{"_id.h":ahl[3]},{"_id.h":ahl[4]},{"_id.h":ahl[5]},{"_id.h":ahl[6]},{"_id.h":ahl[7]},{"_id.h":ahl[8]},{"_id.h":ahl[9]},]},{"_id.avg_mmrk": int(bracket_input.value)}]})
             for inda in anad:
                 update_playerID = ahl.index(int(inda['_id']['h']))
                 current_y[int(update_playerID)*2] = inda['g_avg']
                 current_y[int(update_playerID)*2+1] = inda['exp_avg']
-                dmg_currentY[int(update_playerID)*2] = inda['dmgH_avg']
-                #dmg_currentY[int(update_playerID)*2+1] = inda['exp_avg']
+                dmg_currentY[int(update_playerID)*3] = inda['dmgH_avg']
+                dmg_currentY[int(update_playerID)*3+1] = inda['dmgL_avg']
+                dmg_currentY[int(update_playerID)*3+2] = inda['dmgJ_avg']
 
             segdata_3.data['y0'] = current_y
             segdata_3.data['y1'] = current_y
-            segdata_3.data['y0_dmg'] = dmg_currentY
-            segdata_3.data['y1_dmg'] = dmg_currentY
+            dmgdata_3.data['y0'] = dmg_currentY
+            dmgdata_3.data['y1'] = dmg_currentY
             segdata_3.data['alphacc'] = [0]*20
             segdata_3.data['alphacc'] = [1]*20
+            dmgdata_3.data['alphacc'] = [0]*30
+            dmgdata_3.data['alphacc'] = [1]*30
             segdata_3.data['tickCheck'] = [floor_tick]*20
+            dmgdata_3.data['tickCheck'] = [floor_tick]*30
 
 # init global
 global play_state, match_id
@@ -170,6 +184,7 @@ gd = [int(0)]*10
 exp = [int(0)]*10
 dmg_h = [int(0)]*10
 dmg_l = [int(0)]*10
+dmg_j = [int(0)]*10
 heroURL_list = [""]*10
 circleX = []
 circleY = []
@@ -187,19 +202,24 @@ for i in range(10):
     exp[i] = cd[i]["d"][3]
     dmg_h[i] = cd[i]["d"][7]
     dmg_l[i] = cd[i]["d"][8]
+    dmg_j[i] = cd[i]["d"][9]
     name_list[i] = id_to_name[int(player_hero)].replace('_', ' ')
 
 source = ColumnDataSource(data=columnDict)
 circle_source = ColumnDataSource(data=dict(x=circleX,y=circleY,color=["#95cc4b","#95cc4b","#95cc4b","#95cc4b","#95cc4b","#ca4633","#ca4633","#ca4633","#ca4633","#ca4633"]))
+fTick_source = ColumnDataSource(data=dict(format_tick=[timeConverter(start_time)]))
 
 g_source = ColumnDataSource(data=dict(x=[ind+0.25 for ind in range(1,20,2)], height=gd, y=[0]*10, hero=name_list))
 exp_source = ColumnDataSource(data=dict(x=[ind-0.25 for ind in range(2,21,2)], height=exp, y=[0]*10, hero=name_list))
 dmgH_source = ColumnDataSource(data=dict(x=[ind+0.25 for ind in range(1,20,2)], height=dmg_h, y=[0]*10, hero=name_list))
 dmgL_source = ColumnDataSource(data=dict(x=[ind-0.25 for ind in range(2,21,2)], height=dmg_l, y=[0]*10, hero=name_list))
+dmgJ_source = ColumnDataSource(data=dict(x=[ind+0.25 for ind in range(2,21,2)], height=dmg_j, y=[0]*10, hero=name_list))
 img_source = ColumnDataSource(data=dict(url=[url_map],x=[0],y=[0],w=[32768],h=[32768]))
-hero_img_source = ColumnDataSource(data=dict(url=heroURL_list, x=[ind+0.5 for ind in range(1,20,2)], y=[200]*10, h=[40]*10))
+hero_img_source = ColumnDataSource(data=dict(url=heroURL_list, x=[ind+0.5 for ind in range(1,20,2)], y=[200]*10, x_p3=[ind+0.75 for ind in range(1,20,2)]))
 segx0 = [1,1.5,3,3.5,5,5.5,7,7.5,9,9.5,11,11.5,13,13.5,15,15.5,17,17.5,19,19.5]
-segdata_3 = ColumnDataSource(data=dict(x0=segx0,y0=[0]*20,x1=[ind+0.5 for ind in segx0],y1=[0]*20,alphacc=[0]*20,tickCheck=[0]*20,y0_dmg=[0]*20,y1_dmg=[0]*20))
+segx0_p3 = [1,1.5,2,3,3.5,4,5,5.5,6,7,7.5,8,9,9.5,10,11,11.5,12,13,13.5,14,15,15.5,16,17,17.5,18,19,19.5,20]
+segdata_3 = ColumnDataSource(data=dict(x0=segx0,y0=[0]*20,x1=[ind+0.5 for ind in segx0],y1=[0]*20,alphacc=[0]*20,tickCheck=[0]*20))
+dmgdata_3 = ColumnDataSource(data=dict(alphacc=[0]*30,tickCheck=[0]*30,y0=[0]*30,y1=[0]*30,x0=segx0_p3,x1=[ind+0.5 for ind in segx0_p3]))
 info_source = ColumnDataSource(data=dict(mmr=[cavg_mmr]))
 minimap = ImageURL(url="url",x="x", y="y", w="w", h="h", anchor="center", global_alpha=0.7)
 divStr = styleCSS+"""<a href=https://www.opendota.com/matches/"""+str(match_id)+""">OpenDota Link</a>"""
@@ -221,6 +241,11 @@ p.image_url(url="player8", x="x8", y="y8", w=1500, h=1500, anchor="center", glob
 p.image_url(url="player9", x="x9", y="y9", w=1500, h=1500, anchor="center", global_alpha=1, source=source)
 p.x_range.start = p.y_range.start = -18000
 p.y_range.end = p.x_range.end = 18000
+tick_plot = LabelSet(x=48, y=25, x_units='screen', y_units='screen',
+                 text='format_tick', render_mode='css', source=fTick_source,
+                 border_line_color='black', border_line_alpha=1.0,
+                 background_fill_color='white', background_fill_alpha=1.0)
+p.add_layout(tick_plot)
 ptab = Panel(child=p, title="Minimap view")
 
 map_tabs = Tabs(tabs=[ ptab ],width=600)
@@ -230,7 +255,7 @@ p2 = figure(plot_height=600, plot_width=600, title="", toolbar_location=None, to
 p2.vbar(x="x", width=0.5, top="height", source=g_source, fill_color="#ff7f0e", line_color="#ff7f0e", legend="Gold")
 p2.vbar(x="x", width=0.5, top="height", source=exp_source, fill_color="#1f77b4", line_color="#1f77b4", legend="Experience")
 p2.segment(x0="x0", y0="y0", x1="x1", y1="y1", source=segdata_3, line_alpha='alphacc', line_color="#ff0000", line_width=10, legend="Bracket Average")
-p2.image_url(url="url", x="x", y="y", w=1, h="h", anchor="center", source=hero_img_source)
+p2.image_url(url="url", x="x", y="y", w=25, h=25, anchor="center", source=hero_img_source,h_units='screen',w_units='screen')
 p2.y_range.start = 0
 p2tab = Panel(child=p2, title="Gold/Experience")
 
@@ -238,15 +263,16 @@ p3Hover = HoverTool(tooltips=[('Hero','@hero'),('Value','@height')])
 p3 = figure(plot_height=600, plot_width=600, title="", toolbar_location=None, tools=[p3Hover])
 p3.vbar(x="x", width=0.5, top="height", source=dmgH_source, fill_color="#ff7f0e", line_color="#ff7f0e", legend="Hero damage")
 p3.vbar(x="x", width=0.5, top="height", source=dmgL_source, fill_color="#1f77b4", line_color="#1f77b4", legend="Lane creep damage")
-p3.segment(x0="x0", y0="y0_dmg", x1="x1", y1="y1_dmg", source=segdata_3, line_alpha='alphacc', line_color="#ff0000", line_width=10, legend="Bracket Average")
-p3.image_url(url="url", x="x", y="y", w=1, h="h", anchor="center", source=hero_img_source)
+p3.vbar(x="x", width=0.5, top="height", source=dmgJ_source, fill_color="#43561a", line_color="#43561a", legend="Jungle creep damage")
+p3.segment(x0="x0", y0="y0", x1="x1", y1="y1", source=dmgdata_3, line_alpha='alphacc', line_color="#ff0000", line_width=10, legend="Bracket Average")
+p3.image_url(url="url", x="x_p3", y="y", w=25, h=25, anchor="center", source=hero_img_source,h_units='screen',w_units='screen')
 p3.y_range.start = 0
 p3tab = Panel(child=p3, title="Cumulated Damage")
 
 data_tabs = Tabs(tabs=[ p2tab, p3tab ],width=600)
 
 # Set up widgets
-time_slider = Slider(title='Game time (s)', value=int(start_time), start=int(start_time), end=int(end_time), step=1, callback_policy="mouseup")
+time_slider = Slider(title='Game time slider', value=int(start_time), start=int(start_time), end=int(end_time), step=1, callback_policy="mouseup", css_classes=['hideTime'])
 play_but = Toggle(label="Play", active=False)
 analysis_grp = CheckboxButtonGroup(labels=['Bracket data'])
 bracket_input = Slider(title='Ranking bracket (k)', value=3, start=0, end=9, step=1, callback_policy="mouseup")
