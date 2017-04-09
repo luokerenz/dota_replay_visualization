@@ -15,10 +15,6 @@ from bokeh.models.callbacks import CustomJS
 
 from ConfigParser import SafeConfigParser
 global mongoConfig
-mongoConfig = SafeConfigParser()
-mongoConfig.read('/home/bokeh/mongoConfig.ini')
-
-styleCSS = """<style>body>div>div>div>div>div:first-child>div:first-child>div>input {color: #fff;}</style>"""
 
 def timeConverter(seconds):
     if seconds < 0:
@@ -40,7 +36,7 @@ def icon_finder(hero_id, id_to_name): #input: hero_id, dictionary used for id to
 
 # Set up callbacks
 def update_plot(attrname, old, new):
-    global ahl
+    global ahl, r_tick
     tick = int(time_slider.value)
     fTick_source.data['format_tick'] = [timeConverter(tick)]
     cd = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(tick)})["data"]
@@ -136,6 +132,18 @@ def updateBracket(attrname, old, new):
             segdata_3.data['tickCheck'] = [floor_tick]*20
             dmgdata_3.data['tickCheck'] = [floor_tick]*30
 
+def initTime(col):
+    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.ASCENDING)], limit=1)
+    for doc in cur:
+        start_time = doc['time']
+    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.DESCENDING)], limit=1)
+    for doc in cur:
+        end_time = doc['time']
+    return start_time, end_time
+
+# custom css
+styleCSS = """<style>body>div>div>div>div>div:first-child>div:first-child>div>input {color: #fff;}</style>"""
+
 # init global
 global play_state, match_id
 global ahl # global hero name list
@@ -151,6 +159,8 @@ print match_id
 
 # init local & db connection
 url_map = "http://mf.luokerenz.com/minimap.jpg"
+mongoConfig = SafeConfigParser()
+mongoConfig.read('/home/bokeh/mongoConfig.ini')
 mhost = mongoConfig.get('all', 'host')
 muser = mongoConfig.get('all', 'user')
 mpass = mongoConfig.get('all', 'password')
@@ -158,7 +168,6 @@ columnDict = dict()
 mongo_client = pymongo.MongoClient(mhost, 27011)
 db = mongo_client['dota']
 db.authenticate(muser, mpass)
-
 global col
 col = db.zoneResult
 
@@ -167,19 +176,15 @@ conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).
 id_to_name = conv_dict['name']
 name_to_id = {v: y for y, v in id_to_name.iteritems()}
 
-start_time = 0
-end_time = 0
-# init data from db
-while start_time == 0:
-    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.ASCENDING)], limit=1)
-    for doc in cur:
-        start_time = doc['time']
-    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.DESCENDING)], limit=1)
-    for doc in cur:
-        end_time = doc['time']
-
+start_time, end_time = initTime(col)
 # init dataFrame
-cd_parent = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(start_time)})
+try:
+    cd_parent = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(start_time)})
+except Exception, ae:
+    start_time, end_time = initTime(col)
+    cd_parent = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(start_time)})
+    pass
+
 if cd_parent['avg_mmr']:
     cavg_mmr = int(cd_parent['avg_mmr'])
 else:
@@ -305,13 +310,12 @@ bracket_input.callback = CustomJS(args=dict(source=bracketTrigger), code="""
 play_but.on_click(toggle_cc)
 analysis_grp.on_click(analysis_update)
 
-curdoc().add_periodic_callback(constant_update, 500)
+curdoc().add_periodic_callback(constant_update, 1000)
 
 # Set up layouts and add to document
 time_widget = widgetbox(time_slider,play_but)
 bracket_widget = widgetbox(bracket_input,analysis_grp)
 info_widget = widgetbox(link_html,info_table)
-#link_widget = widgetbox(link_html)
 
 curdoc().add_root(column(row(map_tabs, data_tabs,width=1400),row(time_widget,bracket_widget,info_widget)))
 curdoc().title = "Sliders"
