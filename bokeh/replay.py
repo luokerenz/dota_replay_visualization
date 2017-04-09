@@ -167,13 +167,16 @@ conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).
 id_to_name = conv_dict['name']
 name_to_id = {v: y for y, v in id_to_name.iteritems()}
 
+start_time = 0
+end_time = 0
 # init data from db
-cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.ASCENDING)], limit=1)
-for doc in cur:
-    start_time = doc['time']
-cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.DESCENDING)], limit=1)
-for doc in cur:
-    end_time = doc['time']
+while start_time == 0:
+    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.ASCENDING)], limit=1)
+    for doc in cur:
+        start_time = doc['time']
+    cur = col.find({"tag": 1, "matchid": int(match_id), "time": {"$exists": True}}, sort=[("time", pymongo.DESCENDING)], limit=1)
+    for doc in cur:
+        end_time = doc['time']
 
 # init dataFrame
 cd_parent = col.find_one({"tag": 1, "matchid": int(match_id), "time":int(start_time)})
