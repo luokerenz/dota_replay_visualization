@@ -7,7 +7,7 @@ RUN apk add --no-cache g++ && \
     pip install pandas==0.19.2
 
 RUN apk add --no-cache mariadb-dev mariadb-client mariadb-libs
-RUN pip install flask mysql-python
+RUN pip install flask mysql-python dota2api
 
 COPY . /home/flask/
 
