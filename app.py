@@ -133,10 +133,11 @@ def replayC(match_id, reState):
             conn.commit()
             return 'parser state update to user-req, please check later', "disabled"
         elif passC[1] == 2:
-            if int(reState) == 1:
-                cur.execute("""update Nmatch_history set parser_status=7 where match_id=%s""" %match_id)
-                conn.commit()
-                return 'parse request resubmited, please check later', "disabled"
+            if reState:
+                if int(reState) == 1:
+                    cur.execute("""update Nmatch_history set parser_status=7 where match_id=%s""" %match_id)
+                    conn.commit()
+                    return 'parse request resubmited, please check later', "disabled"
             else:
                 return 'please wait for opendota to parse the replay', ''
         elif passC[1] == 1:
