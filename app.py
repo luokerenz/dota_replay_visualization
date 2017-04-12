@@ -13,15 +13,14 @@ def dateConv(unixInput): return datetime.fromtimestamp(int(unixInput)).strftime(
 mysqlConfig = SafeConfigParser()
 mysqlConfig.read('/home/flask/mysqlConfig.ini')
 #mysqlConfig.read('mysqlConfig.ini')
+conv_dict = pd.read_csv('/home/flask/bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
+#conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
 
 """
 A example for creating a Table that is sortable by its header
 """
 
 app = Flask(__name__, static_url_path = "", static_folder="static")
-# init dictionary lookup
-conv_dict = pd.read_csv('/home/flask/bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
-#conv_dict = pd.read_csv('bokeh_ref.csv',index_col='id').drop('internal_name',1).to_dict()
 global id_to_name
 id_to_name = conv_dict['name']
 
@@ -59,8 +58,6 @@ def indexQ():
     t0=time.time()
     request_time = datetime.now() - timedelta(days=7)
     request_time = request_time.strftime("%Y-%m-%d %H:%M:%S")
-    """return_data = "["+"\n\"H\", \"/hero_icon/Abaddon_icon.png\", \"1.00794\", 1, 1,\n\"He\", \"/hero_icon/Alchemist_icon.png\", \"4.002602\", 2, 1,\n\"Li\", \"/hero_icon/Ancient_Apparition_icon.png\", \"6.941\", 3, 1\n];"
-    """
 
     return_data = "[\n"
 
@@ -103,7 +100,7 @@ def indexQ():
     return_data += "];"
     return return_data
 
-def replayC(match_id):
+def replayC(match_id, reState):
     # init db connection
     mhost = mysqlConfig.get('all', 'host')
     muser = mysqlConfig.get('all', 'userRW')
@@ -123,29 +120,35 @@ def replayC(match_id):
         # 0: unparsed, 1: too short, 2: opendota not parsed, 3: opendota parsed
         # 4: too short, 5: download fail, 6: parsed and stored 7: user-req parse
         if passC[1] == 6:
-            return 'match exists, please go to http://dota.luokerenz.com/replay?match_id=matchid for now'
+            #return 'match exists, please go to http://dota.luokerenz.com/replay?match_id=matchid for now'
+            return 'redirect', ''
         elif passC[1] == 7:
-            return 'match exists and still under processing, please check later'
+            return 'match exists and still under processing, please check later', "disabled"
         elif passC[1] == 5:
-            return 'replay file not available'
+            return 'replay file is expired', "disabled"
         elif passC[1] == 4:
-            return 'match too short'
+            return 'match too short', "disabled"
         elif passC[1] == 3:
             cur.execute("""update Nmatch_history set parser_status=7 where match_id=%s""" %match_id)
             conn.commit()
-            return 'parser state update to user-req, please check later'
+            return 'parser state update to user-req, please check later', "disabled"
         elif passC[1] == 2:
-            return 'please wait for opendota to parse the replay'
+            if int(reState) == 1:
+                cur.execute("""update Nmatch_history set parser_status=7 where match_id=%s""" %match_id)
+                conn.commit()
+                return 'parse request resubmited, please check later', "disabled"
+            else:
+                return 'please wait for opendota to parse the replay', ''
         elif passC[1] == 1:
-            return 'match too short'
+            return 'match too short', "disabled"
         elif passC[1] == 0:
             cur.execute("""update Nmatch_history set parser_status=7 where match_id=%s""" %match_id)
             conn.commit()
-            return 'parser state update to user-req, please check later'
+            return 'parser state update to user-req, please check later', "disabled"
     else:
         # insert new matchid
         state = newEntryCheck(match_id, cur, conn)
-        return state
+        return state, "disabled"
 
 @app.route('/')
 def index():
@@ -155,9 +158,18 @@ def index():
 @app.route('/replayc')
 def replayc():
     match_id = request.args.get('match_id')
-    state = replayC(match_id)
-    return state
-    #return render_template("index.html", table=formated_data)
+    reState = request.args.get('re')
+    if not match_id:
+        state = 'Please enter the correct match id in the search bar'
+        buttonState = "disabled"
+    else:
+        state, buttonState = replayC(match_id, reState)
+    #return state
+    if state == 'redirect':
+        return redirect("http://dota.luokerenz.com/replay?match_id=%s" %match_id)
+    else:
+        reLink = 'http://dota.luokerenz.com/replayc?match_id=%s&re=1' %match_id
+        return render_template("replayc.html", state=state, buttonOF=buttonState, reLink=reLink)
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0')
