@@ -30,7 +30,7 @@ def coor_finder(mongo_client, time):
     return 0
 
 def icon_finder(hero_id, id_to_name): #input: hero_id, dictionary used for id to name conversion
-    icon_head = "http://mf.luokerenz.com/hero_icon/"
+    icon_head = "http://dota.luokerenz.com/hero_icon/"
     hero_name = id_to_name[int(hero_id)]
     return icon_head+str(hero_name)+"_icon.png"
 
@@ -161,6 +161,7 @@ print match_id
 url_map = "http://mf.luokerenz.com/minimap.jpg"
 mongoConfig = SafeConfigParser()
 mongoConfig.read('/home/bokeh/mongoConfig.ini')
+#mongoConfig.read('mongoConfig.ini')
 mhost = mongoConfig.get('all', 'host')
 muser = mongoConfig.get('all', 'user')
 mpass = mongoConfig.get('all', 'password')
