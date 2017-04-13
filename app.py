@@ -40,10 +40,14 @@ def newEntryCheck(match_id, cur, conn):
     dr = int(match_resp['duration'])
     if lbt == 7 and gm == 22 and dr >= 60*25:
         player_node = match_resp['players']
+        if match_resp['radiant_win'] == True:
+            rad_win = 1
+        else:
+            rad_win = 0
         try:
             cur.execute("""insert into Nmatch_history(match_id,game_mode,lobby_type,start_time) values(\'%s\',\'%s\',\'%s\',\'%s\')""" %(match_id,gm,lbt,dateConv(match_resp['start_time'])))
             conn.commit()
-            cur.execute("""update Nmatch_history set parser_status=7, player0Hero=%s, player1Hero=%s, player2Hero=%s, player3Hero=%s, player4Hero=%s, player5Hero=%s, player6Hero=%s, player7Hero=%s, player8Hero=%s, player9Hero=%s where match_id=%s""" %(player_node[0]['hero_id'],player_node[1]['hero_id'],player_node[2]['hero_id'],player_node[3]['hero_id'],player_node[4]['hero_id'],player_node[5]['hero_id'],player_node[6]['hero_id'],player_node[7]['hero_id'],player_node[8]['hero_id'],player_node[9]['hero_id'],match_id))
+            cur.execute("""update Nmatch_history set rad_win=%s, parser_status=7, player0Hero=%s, player1Hero=%s, player2Hero=%s, player3Hero=%s, player4Hero=%s, player5Hero=%s, player6Hero=%s, player7Hero=%s, player8Hero=%s, player9Hero=%s where match_id=%s""" %(rad_win, player_node[0]['hero_id'],player_node[1]['hero_id'],player_node[2]['hero_id'],player_node[3]['hero_id'],player_node[4]['hero_id'],player_node[5]['hero_id'],player_node[6]['hero_id'],player_node[7]['hero_id'],player_node[8]['hero_id'],player_node[9]['hero_id'],match_id))
             conn.commit()
             return 'inserted, please check later'
         except MySQLdb.IntegrityError:
