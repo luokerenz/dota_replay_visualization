@@ -158,7 +158,7 @@ except:
 print match_id
 
 # init local & db connection
-url_map = "http://mf.luokerenz.com/minimap.jpg"
+url_map = "http://dota.luokerenz.com/minimap.jpg"
 mongoConfig = SafeConfigParser()
 mongoConfig.read('/home/bokeh/mongoConfig.ini')
 #mongoConfig.read('mongoConfig.ini')
