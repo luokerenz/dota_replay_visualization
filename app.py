@@ -74,7 +74,8 @@ def indexQ():
     attempts = 0
     while attempts < 3:
         try:
-            qStr = """select match_id,player0Hero,player1Hero,player2Hero,player3Hero,player4Hero,player5Hero,player6Hero,player7Hero,player8Hero,player9Hero from Nmatch_history where replay_url is not null and (parser_status=3 or parser_status=6) and start_time > \"%s\" limit 100""" %request_time
+            #qStr = """select match_id,player0Hero,player1Hero,player2Hero,player3Hero,player4Hero,player5Hero,player6Hero,player7Hero,player8Hero,player9Hero from Nmatch_history where replay_url is not null and (parser_status=3 or parser_status=6) and start_time > \"%s\" limit 100""" %request_time
+            qStr = """select match_id,player0Hero,player1Hero,player2Hero,player3Hero,player4Hero,player5Hero,player6Hero,player7Hero,player8Hero,player9Hero from Nmatch_history where replay_url is not null and (parser_status=3 or parser_status=6) limit 100""" # temp fix for missing recent data
             cur.execute(qStr)
             returnQ = cur.fetchall()
             conn.close()
